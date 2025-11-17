@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
 
+env:
+  IMAGE_REGISTRY: "ghcr.io"
+  IMAGE_NAME: "wizrds/lockbox"
+  IMAGE_URI: "ghcr.io/wizrds/lockbox"
+
 jobs:
   bump:
     if: |
