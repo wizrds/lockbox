@@ -1,0 +1,33 @@
+[package]
+name = "lockbox"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+repository.workspace = true
+license.workspace = true
+readme.workspace = true
+
+[[bin]]
+name = "lockbox"
+path = "src/main.rs"
+
+[dependencies]
+lockbox-core = { path = "../lockbox-core" }
+lockbox-api = { path = "../lockbox-api" }
+
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_yml = { workspace = true }
+validator = { workspace = true }
+uuid = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+chrono = { workspace = true }
+rustls = { workspace = true }
+jobq = { workspace = true }
+figment = { version = "0.10.19", features = ["toml", "json", "yaml", "env"] }
+clap = { version = "4.5.16", features = ["env", "derive"] }
+humantime = { version = "2.2.0" }

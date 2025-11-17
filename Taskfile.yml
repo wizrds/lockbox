@@ -1,0 +1,25 @@
+version: '3'
+
+silent: true
+
+includes:
+  version:
+    taskfile: .taskfile/version.yml
+  rust:
+    taskfile: .taskfile/rust.yml
+  docker:
+    taskfile: .taskfile/docker.yml
+  database:
+    taskfile: .taskfile/database.yml
+  helm:
+    taskfile: .taskfile/helm.yml
+    vars:
+      HELM_DOCS_VERSION: v1.13.1
+  utils:
+    taskfile: .taskfile/utils.yml
+
+
+tasks:
+  run:
+    cmds:
+      - cargo run --bin lockbox -- {{.CLI_ARGS}}

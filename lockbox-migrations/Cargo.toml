@@ -1,0 +1,21 @@
+[package]
+name = "lockbox-migrations"
+version = "0.1.11"
+edition = "2021"
+
+[lib]
+name = "lockbox_migrations"
+path = "src/lib.rs"
+
+[[bin]]
+name = "lockbox-migrations"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sea-orm = { workspace = true }
+sea-orm-migration = { workspace = true }
+uuid = { workspace = true }

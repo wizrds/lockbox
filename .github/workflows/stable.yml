@@ -1,0 +1,140 @@
+name: stable
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  bump:
+    if: |
+      !contains(github.event.head_commit.message, '[skip-ci]') &&
+      !startsWith(github.event.head_commit.message, 'chore(release):') &&
+      github.repository == 'wizrds/lockbox'
+    name: Bump version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      bumped: ${{ steps.bump_version.outputs.bumped }}
+      current_version: ${{ steps.version_info.outputs.current_version }}
+      next_version: ${{ steps.version_info.outputs.next_version }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.RELEASE_TOKEN }}
+          fetch-depth: 0
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: "3.43.3"
+
+      - name: Set up git identity
+        run: |
+          git config --local user.name "${{ vars.RELEASE_GIT_USER }}"
+          git config --local user.email "${{ secrets.RELEASE_GIT_EMAIL }}"
+
+      - name: Get current and next versions
+        id: version_info
+        run: |
+          CURRENT_VERSION=$(task version:current)
+          NEXT_VERSION=$(task version:next)
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump_version
+        run: |
+          set +e
+          OUTPUT=$(task version:bump 2>&1)
+          STATUS=$?
+          set -e
+          echo "$OUTPUT"
+
+          if [ $STATUS -ne 0 ]; then
+            echo "No version bump detected."
+            echo "bumped=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "bumped=true" >> $GITHUB_OUTPUT
+
+      - name: Push changes
+        if: steps.bump_version.outputs.bumped == 'true'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.RELEASE_TOKEN }}
+          branch: main
+          tags: true
+
+  publish-helm-charts:
+    if: |
+      !contains(github.event.head_commit.message, '[skip-ci]') &&
+      github.repository == 'wizrds/lockbox'
+    name: Publish Helm Charts
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - chart_path: deploy/helm/lockbox
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Set up Helm and yq
+      uses: docker://dtzar/helm-kubectl:3.17.0
+      with:
+        args: /bin/sh -c "helm version && yq --version"
+
+    - name: Extract chart name and version
+      id: chart_info
+      run: |
+        CHART_PATH="${{ matrix.chart_path }}"
+        CHART_NAME=$(yq e '.name' "$CHART_PATH/Chart.yaml")
+        CHART_VERSION=$(yq e '.version' "$CHART_PATH/Chart.yaml")
+
+        echo "chart_name=$CHART_NAME" >> $GITHUB_OUTPUT
+        echo "chart_version=$CHART_VERSION" >> $GITHUB_OUTPUT
+        echo "chart_path=$CHART_PATH" >> $GITHUB_OUTPUT
+
+    - name: Login to GitHub Container Registry
+      env:
+        CR_PAT: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "$CR_PAT" | helm registry login ${{ env.IMAGE_REGISTRY }} --username ${{ github.actor }} --password-stdin
+
+    - name: Check if chart version already exists
+      id: check_version
+      env:
+        CHART_NAME: ${{ steps.chart_info.outputs.chart_name }}
+        CHART_VERSION: ${{ steps.chart_info.outputs.chart_version }}
+      run: |
+        set +e
+        helm show all "oci://${{ env.IMAGE_URI }}/charts/$CHART_NAME" --version "$CHART_VERSION" > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+          echo "Chart $CHART_NAME version $CHART_VERSION already exists in GHCR, skipping publish."
+          echo "skip_publish=true" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        echo "skip_publish=false" >> $GITHUB_OUTPUT
+        set -e
+
+    - name: Package and push chart
+      if: steps.check_version.outputs.skip_publish == 'false'
+      env:
+        CHART_NAME: ${{ steps.chart_info.outputs.chart_name }}
+        CHART_VERSION: ${{ steps.chart_info.outputs.chart_version }}
+        CHART_PATH: ${{ steps.chart_info.outputs.chart_path }}
+      run: |
+        helm package "$CHART_PATH" \
+          --version "$CHART_VERSION" \
+          --destination "$CHART_PATH" \
+          --dependency-update
+
+        helm push "$CHART_PATH/$CHART_NAME-$CHART_VERSION.tgz" \
+          "oci://${{ env.IMAGE_URI }}/charts"

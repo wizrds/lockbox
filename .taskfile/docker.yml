@@ -1,0 +1,22 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Build the application in a Docker container
+    vars:
+      IMAGE_NAME: '{{ .IMAGE_NAME | default "ghcr.io/wizrds/lockbox" }}'
+      IMAGE_TAG: '{{ .IMAGE_TAG | default "local" }}'
+    cmds:
+      - |
+        DOCKER_BUILDKIT=1 docker build -f build/docker/Dockerfile -t {{.IMAGE_NAME}}:{{.IMAGE_TAG}} .
+
+  push:local:
+    desc: Push the local Docker image to the registry
+    vars:
+      IMAGE_NAME: '{{ .IMAGE_NAME | default "ghcr.io/wizrds/lockbox" }}'
+      IMAGE_TAG: '{{ .IMAGE_TAG | default "local" }}'
+      LOCAL_IMAGE_NAME: '{{ .LOCAL_IMAGE_NAME | default "k3d-dev.localhost:5000/lockbox" }}'
+    cmds:
+      - |
+        docker tag {{.IMAGE_NAME}}:{{.IMAGE_TAG}} {{.LOCAL_IMAGE_NAME}}:{{.IMAGE_TAG}}
+        docker push --all-tags {{.LOCAL_IMAGE_NAME}}

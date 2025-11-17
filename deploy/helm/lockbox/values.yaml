@@ -1,0 +1,185 @@
+config:
+  # -- The default tenant ID to use if not specified in requests, if not specified then
+  # defaults to `default`
+  defaultTenantId: ""
+  # -- The default namespace for the default tenant, if not specified then defaults
+  # to `apik`
+  defaultNamespace: ""
+  taskQueue:
+    # -- The number of batch workers to run
+    workerCount: 4
+    # -- The max capacity for the task queue
+    maxQueueCapacity: 100
+    # -- The max number of tasks in a batch
+    batchSize: 12
+    # -- The max time to wait for a batch to fill
+    batchTimeoutMs: 10
+  database:
+    primary:
+      # -- The database type, can be `sqlite` or `postgresql`
+      type: postgresql
+      # -- The database path if using sqlite
+      path: ""
+      # -- The database host if using postgresql
+      host: ""
+      # -- The database port
+      port: 5432
+      # -- The database name
+      name: lockbox
+      # -- The database username
+      username:
+        # @ignored
+        value: ""
+        # secretKeyRef:
+        #   name: postgres-secrets
+        #   key: user
+      # -- The database password
+      password:
+        # @ignored
+        value: ""
+        # secretKeyRef:
+        #   name: postgres-secrets
+        #   key: password
+    replicas: []
+      # - type: postgresql
+      #   path: ""
+      #   host: ""
+      #   port: 5432
+      #   name: lockbox
+      #   username:
+      #     value: ""
+      #     # secretKeyRef:
+      #     #   name: postgres-secrets
+      #     #   key: user
+      #   password:
+      #     value: ""
+      #     # Or if using an existing secret
+      #     # secretKeyRef:
+      #     #   name: postgres-secrets
+      #     #   key: password
+    # -- Additional options for the database
+    options: {}
+  telemetry:
+    # -- Enable telemetry
+    enabled: false
+    # -- The telemetry endpoint
+    endpoint: ""
+  sentry:
+    # -- Enable Sentry reporting
+    enabled: false
+    # -- The DSN for the Sentry project
+    dsn: ""
+
+
+migrations:
+  # -- Run database migrations at startup
+  enabled: false
+
+bootstrap:
+  # -- Run a bootstrap container to create the resources at startup
+  enabled: false
+  # -- The namespaces to create
+  namespaces: []
+    # Additional namespaces and their tags, optionally specifying tenant ID
+    # If the tenant ID is not specified then it uses the default tenant ID in the config
+    # The namespace and tag names must be between 1 and 6 characters
+    # - name: anoth
+    #   tenantId: another
+    #   tags: [dev, prod]
+
+server:
+  # -- Amount of replicas to deploy for the server
+  replicaCount: 1
+  # -- The port to use for the server
+  port: 8080
+  service:
+    # -- The type of service to create
+    type: ClusterIP
+    # -- Additional ports to add to the service
+    ports: []
+  ingress:
+    # -- Whether to enable the ingress
+    enabled: false
+    # -- The hosts to use for the ingress
+    hosts: []
+    # -- The TLS configuration for the ingress
+    tlsSecretName: ""
+    # -- The cluster issuer to use for the ingress for certificates
+    clusterIssuer: ""
+    # -- Additional annotations to add to the ingress
+    annotations: {}
+  # -- Pod liveness probe
+  livenessProbe:
+    # @ignored
+    httpGet:
+      path: /
+      port: http
+      scheme: HTTP
+  # -- Pod readiness probe
+  readinessProbe:
+    # @ignored
+    httpGet:
+      path: /
+      port: http
+      scheme: HTTP
+  # -- Additional annotations to add to the server pod
+  podAnnotations: {}
+  # -- Additional labels to add to the server pod
+  podLabels: {}
+  # -- server Pod Security Context
+  podSecurityContext: {}
+    # fsGroup: 2000
+  # -- server container Security Context
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+  # -- Resources to allocate to the server
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+  # -- Any extra environment variables to pass to the server container
+  env: {}
+  #  SOME_ENV_VAR:
+  #    value: "some value"
+  #  ANOTHER_ENV_VAR:
+  #    valueFrom:
+  #      secretKeyRef:
+  #        name: some-secret
+  #        key: some-key
+  # -- Additional volumes on the output server Deployment definition
+  volumes: []
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+  # -- Additional volumeMounts on the output server Deployment definition.
+  volumeMounts: []
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+  # -- server Node selector
+  nodeSelector: {}
+  # -- server Tolerations
+  tolerations: []
+  # -- server Affinity
+  affinity: {}
+
+
+# -- The image to use for the lockbox container
+image:
+  # -- The repository to use for the image
+  repository: registry.gitlab.com/wizrds/lockbox
+  # -- The tag to use for the image. If null, the chart appVersion will be used.
+  tag: null
+  # -- The pull policy to use for the image
+  pullPolicy: Always
+  # -- The pull secrets to use for the image
+  pullSecrets: []

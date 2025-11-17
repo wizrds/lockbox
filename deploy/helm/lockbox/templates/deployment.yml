@@ -1,0 +1,148 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-server
+  labels:
+    {{- include "lockbox-server.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.server.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "lockbox.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.server.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "lockbox-server.labels" . | nindent 8 }}
+        {{- with .Values.server.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.server.podSecurityContext | nindent 8 }}
+      {{- if (or .Values.migrations.enabled .Values.bootstrap.enabled) }}
+      initContainers:
+      {{- if .Values.migrations.enabled }}
+        - name: migrate
+          image: "{{ .Values.image.repository }}:{{ include "image-tag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - lockbox migrate
+          env:
+          {{- include "lockbox.databaseEnvVars" (dict "config" .Values.config.database) | indent 10 }}
+          {{- if .Values.server.volumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.server.volumeMounts | nindent 6 }}
+          {{- end }}
+      {{- end }}
+      {{- if (and .Values.bootstrap.enabled .Values.bootstrap.namespaces) }}
+        - name: bootstrap
+          image: "{{ .Values.image.repository }}:{{ include "image-tag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              {{- include "lockbox.bootstrapScript" (dict "bootstrap" .Values.bootstrap "config" .Values.config) | nindent 14 }}
+          env:
+          {{- include "lockbox.databaseEnvVars" (dict "config" .Values.config.database) | indent 10 }}
+          {{- if .Values.server.volumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.server.volumeMounts | nindent 6 }}
+          {{- end }}
+      {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.server.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ include "image-tag" . }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - serve
+          ports:
+          - name: http
+            containerPort: {{ .Values.server.port }}
+            protocol: TCP
+          env:
+          - name: LOCKBOX__SERVER__HOST
+            value: "0.0.0.0"
+          - name: LOCKBOX__SERVER__PORT
+            value: {{ .Values.server.port | quote }}
+          - name: LOCKBOX__TASK_QUEUE__WORKER_COUNT
+            value: {{ .Values.config.taskQueue.workerCount | quote }}
+          - name: LOCKBOX__TASK_QUEUE__MAX_QUEUE_CAPACITY
+            value: {{ .Values.config.taskQueue.maxQueueCapacity | quote }}
+          - name: LOCKBOX__TASK_QUEUE__BATCH_SIZE
+            value: {{ .Values.config.taskQueue.batchSize | quote }}
+          - name: LOCKBOX__TASK_QUEUE__BATCH_TIMEOUT_MS
+            value: {{ .Values.config.taskQueue.batchTimeoutMs | quote }}
+          - name: LOCKBOX__TELEMETRY__ENABLED
+            value: {{ .Values.config.telemetry.enabled | quote }}
+          {{- if .Values.config.telemetry.endpoint }}
+          - name: LOCKBOX__TELEMETRY__ENDPOINT
+            value: {{ .Values.config.telemetry.endpoint | quote }}
+          {{- end }}
+          - name: LOCKBOX__SENTRY__ENABLED
+            value: {{ .Values.config.sentry.enabled | quote }}
+          {{- if .Values.config.sentry.dsn }}
+          - name: LOCKBOX__SENTRY__DSN
+            value: {{ .Values.config.sentry.dsn | quote }}
+          {{- end }}
+          {{- if .Values.config.defaultTenantId }}
+          - name: LOCKBOX__DEFAULT_TENANT_ID
+            value: {{ .Values.config.defaultTenantId | quote }}
+          {{- end }}
+          {{- if .Values.config.defaultNamespace }}
+          - name: LOCKBOX__DEFAULT_NAMESPACE
+            value: {{ .Values.config.defaultNamespace | quote }}
+          {{- end }}
+          {{- include "lockbox.databaseEnvVars" (dict "config" .Values.config.database) | indent 10 }}
+          {{- range $name, $value := .Values.server.env }}
+          - name: {{ $name }}
+            {{- if $value.value }}
+            value: {{ $value.value | quote }}
+            {{- else if $value.secretKeyRef }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $value.secretKeyRef.name }}
+                key: {{ $value.secretKeyRef.key }}
+            {{- end }}
+          {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.server.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.server.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.server.resources | nindent 12 }}
+          {{- if .Values.server.volumeMounts }}
+          volumeMounts:
+            {{- with .Values.server.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+      {{- if .Values.server.volumes }}
+      volumes:
+        {{- with .Values.server.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
