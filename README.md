@@ -7,7 +7,7 @@ Lockbox is a secure API key management system designed to allow API key authenti
 To run Lockbox using Docker, execute the following command:
 
 ```bash
-docker run -p 8087:8087 ghcr.io/wizrds/lockbox:0.1.0 serve --migrations
+docker run -p 8087:8087 ghcr.io/wizrds/lockbox:0.1.1 serve --migrations
 ```
 
 ## Installation with Helm
@@ -15,7 +15,7 @@ docker run -p 8087:8087 ghcr.io/wizrds/lockbox:0.1.0 serve --migrations
 To install Lockbox using Helm, you can use the following command:
 
 ```bash
-helm upgrade --install lockbox oci://ghcr.io/wizrds/lockbox/charts/lockbox --version 0.1.0
+helm upgrade --install lockbox oci://ghcr.io/wizrds/lockbox/charts/lockbox --version 0.1.1
 ```
 
 For the available values please refer to the [values.yaml](deploy/helm/lockbox/values.yaml) file.
