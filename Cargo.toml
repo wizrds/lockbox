@@ -41,3 +41,5 @@ sea-orm = { version = "1.1", features = ["sqlx-sqlite", "sqlx-postgres", "runtim
 sea-orm-migration = "1.1"
 uuid = { version = "1", features = ["v4", "fast-rng", "zerocopy", "serde"] }
 jobq = { git = "https://github.com/wizrds/jobq-rs.git", tag = "0.1.0", version = "0.1.0" }
+
+criterion = { version = "0.8", features = ["html_reports"] }

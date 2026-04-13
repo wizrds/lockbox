@@ -1,6 +1,6 @@
 use crc32fast::Hasher;
 use sha2::{Sha512, Digest};
-use rand::{distr::Alphanumeric, Rng, rng};
+use rand::{distr::Alphanumeric, RngExt, rng};
 use constant_time_eq::constant_time_eq;
 
 
@@ -54,7 +54,7 @@ pub fn get_checksum(items: &[&str]) -> String {
 /// # Returns
 /// A string representing the SHA-512 hash of the input.
 pub fn hash_sha512(input: &str) -> String {
-    format!("{:x}", Sha512::digest(input.as_bytes()))
+    hex::encode(Sha512::digest(input.as_bytes()))
 }
 
 

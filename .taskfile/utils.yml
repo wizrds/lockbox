@@ -4,3 +4,31 @@ tasks:
   pack:
     cmds:
       - yek --config-file yek.yaml {{.CLI_ARGS}}
+
+  test:k6:
+    desc: Run the k6 tests
+    cmds:
+      - |
+        if [ -z "{{.TEST_SUITE}}" ]; then
+          export TEST_SUITE="perf"
+        else
+          export TEST_SUITE="{{.TEST_SUITE}}"
+        fi
+
+        if [ -z "{{.TEST}}" ]; then
+          export TEST_NAME=""
+        else
+          export TEST_NAME="{{.TEST}}"
+        fi
+
+        cd tests/k6
+        rm -rf output/src
+        npm run compile
+
+        if [ -z "$TEST_NAME" ]; then
+          echo "Running all tests"
+          find output/src/$TEST_SUITE -type f -name "*.js" -exec k6 run {} \;
+        else
+          echo "Running test $TEST_NAME"
+          k6 run output/src/$TEST_SUITE/$TEST_NAME.js
+        fi
