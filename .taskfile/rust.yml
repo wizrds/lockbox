@@ -1,7 +1,7 @@
 version: '3'
 
 tasks:
-  update-cargo-lock:
+  lock:
     cmds: 
       - cargo update
 
@@ -21,17 +21,25 @@ tasks:
     desc: Lint the code
     cmds:
       - >
-        cargo clippy --all-targets --all-features
+        cargo clippy --workspace --all-targets --all-features --exclude runtime-scaf {{.CLI_ARGS}}
 
   lint:fix:
     desc: Lint the code
     cmds:
       - >
-        cargo clippy --fix --all-targets --all-features --allow-dirty --allow-staged
+        cargo clippy --workspace --fix --all-targets --all-features --allow-dirty --allow-staged --exclude runtime-scaf {{.CLI_ARGS}}
 
   test:
     cmds:
-      - cargo test --all-features {{.CLI_ARGS}}
+      - cargo test --all-features --workspace --lib {{.CLI_ARGS}}
+
+  bench:
+    cmds:
+      - cargo bench --all-features {{.CLI_ARGS}}
+
+  bench:criterion:
+    cmds:
+      - cargo criterion --all-features {{.CLI_ARGS}}
 
   build:
     desc: Build the application

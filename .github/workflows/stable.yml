@@ -92,7 +92,7 @@ jobs:
       uses: actions/checkout@v5
 
     - name: Set up Helm and yq
-      uses: docker://dtzar/helm-kubectl:3.17.0
+      uses: docker://dtzar/helm-kubectl:4.13.0
       with:
         args: /bin/sh -c "helm version && yq --version"
 

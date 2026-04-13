@@ -14,6 +14,6 @@
 			]
 		}
 	},
-	"postCreateCommand": "pre-commit install --install-hooks && rustc --version && python --version",
+	"postCreateCommand": "prek install --install-hooks && rustc --version && python --version",
 	"remoteUser": "dev"
 }

@@ -9,14 +9,14 @@ tasks:
     desc: Print the version
     deps: [devtools:install]
     cmds:
-      - svu current --strip-prefix {{.CLI_ARGS}}
+      - svu current --tag.prefix='' {{.CLI_ARGS}}
 
   next:
     desc: Get the next version given SemVer
     deps: [devtools:install]
     cmds:
       - |
-        NEXT=$(svu next --strip-prefix {{.CLI_ARGS}})
+        NEXT=$(svu next --v0 --tag.prefix='' {{.CLI_ARGS}})
         if [ -n "{{.PRE_RELEASE}}" ]; then
           NEXT="$NEXT-{{.PRE_RELEASE}}"
         fi
@@ -184,39 +184,41 @@ tasks:
     desc: Generate the changelog
     deps: [devtools:install]
     cmds:
-      - git-chglog {{.CLI_ARGS}}
+      - git-cliff --offline --no-exec {{.CLI_ARGS}} -o CHANGELOG.md $(git rev-list --max-parents=0 HEAD)..$(git describe --tags --abbrev=0)
 
   bump:
     desc: Bump version and update all relevant files
     deps: [devtools:install]
     cmds:
       - |
-        # Version calculation remains the same
-        export CURRENT_VERSION=$(svu current --strip-prefix)
-        export NEXT_VERSION=$(svu next --strip-prefix)
-        [ "$CURRENT_VERSION" == "$NEXT_VERSION" ] && exit 1
+        export CURRENT_VERSION=$(svu current --tag.prefix='')
+        export NEXT_VERSION=$(svu next --tag.prefix='')
+        
+        if [ "$CURRENT_VERSION" = "$NEXT_VERSION" ]; then
+          echo "CURRENT_VERSION=$CURRENT_VERSION"
+          echo "NEXT_VERSION=$NEXT_VERSION"
+          echo "Version unchanged, exiting."
+          exit 1
+        fi
 
-        # Apply metadata if specified
         [ -n "{{.PRE_RELEASE}}" ] && NEXT_VERSION="$NEXT_VERSION-{{.PRE_RELEASE}}"
         [ -n "{{.BUILD_METADATA}}" ] && NEXT_VERSION="$NEXT_VERSION+{{.BUILD_METADATA}}"
 
-        # Generate changelog
         echo "Generating changelog..."
-        git-chglog -o CHANGELOG.md --next-tag $NEXT_VERSION || true
+        git-cliff --offline --no-exec -o CHANGELOG.md --tag $NEXT_VERSION || true
         echo "CHANGELOG.md" > .modified_files
 
-        # Update version files
+        PACKAGES=($(cargo metadata --no-deps --format-version 1 | jq -r '.packages[].manifest_path' | sed 's/\/Cargo\.toml$//'))
+
         task version:update:multi-package \
           LANGUAGE=rust \
-          VERSION_FILE=Cargo.toml \
-          PACKAGES="lockbox-macros lockbox-migrations lockbox-core lockbox-api lockbox" >> .modified_files
+          VERSION_FILE=Cargo.toml \ 
+          PACKAGES="${PACKAGES[*]}" >> .modified_files
 
-        # Add all modified files to git
         while read -r file; do
           [ -f "$file" ] && echo "Adding $file to git staging" && git add "$file"
         done < .modified_files
 
-        # Commit and tag
         echo "Committing and tagging the release..."
         git commit -m "chore(release): Release $NEXT_VERSION"
         git tag "$NEXT_VERSION" -m "chore(release): Release $NEXT_VERSION"

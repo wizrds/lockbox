@@ -3,4 +3,4 @@ version: '3'
 tasks:
   pack:
     cmds:
-      - npx repomix {{.CLI_ARGS}}
+      - yek --config-file yek.yaml {{.CLI_ARGS}}
