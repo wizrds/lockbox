@@ -21,8 +21,12 @@ RUN cargo build --release --features mimalloc
 
 FROM debian:bookworm-slim AS runtime
 
+RUN apt-get update && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN useradd -u 1000 -G sudo -U -m -s /bin/bash lockbox \
     && echo "lockbox ALL=(ALL) NOPASSWD: /bin/chown" >> /etc/sudoers
+
 RUN mkdir -p /srv/lockbox && chown lockbox:lockbox /srv/lockbox
 WORKDIR /srv/lockbox
 
