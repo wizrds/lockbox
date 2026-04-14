@@ -3,6 +3,10 @@
 ---
 ## [0.2.0](https://github.com/wizrds/lockbox/-/compare/0.1.1...0.2.0) - 2026-04-14
 
+### Bug Fixes
+
+- Fix bump version task and publish helm chart job - ([328ff63](https://github.com/wizrds/lockbox/-/commit/328ff63f801ad60a9f25fb898fe7f9934d7a0625)) - Timothy Pogue
+
 ### Features
 
 - Add mimalloc support and bump dependency versions  - ([c3d3d3c](https://github.com/wizrds/lockbox/-/commit/c3d3d3c1a6a192f1136d102774bf143318be9da5)) - Timothy Pogue
