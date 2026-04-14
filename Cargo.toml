@@ -1,5 +1,5 @@
 [workspace.package]
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 description = "API key authentication service for Rest APIs"
 repository = "https://github.com/wizrds/lockbox"

@@ -1,6 +1,16 @@
 # Changelog
 
 ---
+## [0.2.1](https://github.com/wizrds/lockbox/-/compare/0.2.0...0.2.1) - 2026-04-14
+
+### Bug Fixes
+
+- Ensure runtime image packages updated in docker image - ([5f14daf](https://github.com/wizrds/lockbox/-/commit/5f14daf0cbea9d6f79af25c1719806e5ee384517)) - Timothy Pogue
+
+### Miscellaneous
+
+- **(helm)** Bump default app version - ([965fc52](https://github.com/wizrds/lockbox/-/commit/965fc524045782c77c17d1bbdd3779106c9c5611)) - Timothy Pogue
+---
 ## [0.2.0](https://github.com/wizrds/lockbox/-/compare/0.1.1...0.2.0) - 2026-04-14
 
 ### Bug Fixes
