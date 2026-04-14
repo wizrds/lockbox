@@ -1,6 +1,12 @@
 # Changelog
 
 ---
+## [0.2.2](https://github.com/wizrds/lockbox/-/compare/0.2.1...0.2.2) - 2026-04-14
+
+### Bug Fixes
+
+- **(ci)** Only fail scan on critical for release workflow - ([623eb13](https://github.com/wizrds/lockbox/-/commit/623eb13bba6011de294199a3b4c2f9ebc165f620)) - Timothy Pogue
+---
 ## [0.2.1](https://github.com/wizrds/lockbox/-/compare/0.2.0...0.2.1) - 2026-04-14
 
 ### Bug Fixes
