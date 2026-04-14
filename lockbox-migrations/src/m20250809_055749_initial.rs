@@ -160,6 +160,14 @@ impl MigrationTrait for Migration {
         manager
             .drop_table(
                 Table::drop()
+                    .table(ApiKeyTag::Table)
+                    .to_owned()
+            )
+            .await?;
+
+        manager
+            .drop_table(
+                Table::drop()
                     .table(ApiKeyNamespace::Table)
                     .to_owned()
             )

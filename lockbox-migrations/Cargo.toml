@@ -1,7 +1,11 @@
 [package]
 name = "lockbox-migrations"
-version = "0.1.1"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+description.workspace = true
+repository.workspace = true
+license.workspace = true
+readme.workspace = true
 
 [lib]
 name = "lockbox_migrations"

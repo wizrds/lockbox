@@ -1,0 +1,21 @@
+{
+  "name": "k6",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "swc src -d output",
+    "run:smoke": "npm run compile && k6 run output/src/perf/smoke.js",
+    "run:key-lifecycle": "npm run compile && k6 run output/src/perf/key-lifecycle.js",
+    "run:verify-api-key": "npm run compile && k6 run output/src/perf/verify-api-key.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@swc/cli": "^0.8.1",
+    "@swc/core": "^1.15.24",
+    "@types/k6": "^1.7.0",
+    "typescript": "^6.0.2"
+  }
+}

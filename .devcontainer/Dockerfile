@@ -19,6 +19,20 @@ ENV LC_ALL=en_US.UTF-8
 RUN useradd -u 1000 -G sudo -U -m -s /usr/bin/zsh dev \
     && echo "dev ALL=(ALL) NOPASSWD: /bin/chown" >> /etc/sudoers
 
+COPY --from=ghcr.io/j178/prek:v0.3.2 /prek /usr/local/bin/prek
+COPY --from=docker.io/jnorwood/helm-docs:v1.14.2 /usr/bin/helm-docs /usr/local/bin/helm-docs
+RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq && \
+    chmod +x /usr/local/bin/yq
+
+ENV HELM_VERSION=v4.1.1
+RUN curl -LO "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" && \
+    tar -zxvf "helm-${HELM_VERSION}-linux-amd64.tar.gz" && \
+    mv linux-amd64/helm /usr/local/bin/helm && \
+    rm "helm-${HELM_VERSION}-linux-amd64.tar.gz"
+
+RUN curl -LO https://dl.k8s.io/release/v1.35.0/bin/linux/amd64/kubectl && \
+    mv kubectl /usr/local/bin/kubectl
+
 # Install Taskfile
 RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
 ADD .taskfile /home/dev/.taskfile

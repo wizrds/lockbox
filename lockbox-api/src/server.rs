@@ -127,7 +127,7 @@ pub async fn serve_tls(addr: String, router: Router, tls_config: RustlsConfig) -
     tokio::spawn(shutdown_signal(handle.clone()));
     axum_server::bind_rustls(addr.parse::<SocketAddr>().expect("Invalid address"), tls_config)
         .handle(handle)
-        .serve(router.into_make_service())
+        .serve(router.into_make_service_with_connect_info::<SocketAddr>())
         .await
 }
 
@@ -136,11 +136,11 @@ pub async fn serve(addr: String, router: Router) -> std::io::Result<()> {
     tokio::spawn(shutdown_signal(handle.clone()));
     axum_server::bind(addr.parse::<SocketAddr>().expect("Invalid address"))
         .handle(handle)
-        .serve(router.into_make_service())
+        .serve(router.into_make_service_with_connect_info::<SocketAddr>())
         .await
 }
 
-pub async fn shutdown_signal(handle: axum_server::Handle) {
+pub async fn shutdown_signal(handle: axum_server::Handle<SocketAddr>) {
     let ctrl_c = async {
         signal::ctrl_c()
             .await

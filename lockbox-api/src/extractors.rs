@@ -208,11 +208,10 @@ where
     type Rejection = ErrorResponseDTO;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
-        let query = parts.uri.query().unwrap_or("");
-        let config = QsConfig::new(5, false);
-
-        config
-            .deserialize_str::<T>(query)
+        QsConfig::new()
+            .max_depth(5)
+            .use_form_encoding(false)
+            .deserialize_str::<T>(parts.uri.query().unwrap_or(""))
             .map(|query| Query(query))
             .map_err(|err| ErrorResponseDTO::from(
                 ApiError::bad_request(err.to_string().as_str())
