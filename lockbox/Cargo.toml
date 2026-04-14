@@ -11,6 +11,11 @@ readme.workspace = true
 name = "lockbox"
 path = "src/main.rs"
 
+[features]
+default = ["mimalloc"]
+mimalloc = ["dep:mimalloc"]
+stdalloc = []
+
 [dependencies]
 lockbox-core = { path = "../lockbox-core" }
 lockbox-api = { path = "../lockbox-api" }
@@ -28,6 +33,9 @@ thiserror = { workspace = true }
 chrono = { workspace = true }
 rustls = { workspace = true }
 jobq = { workspace = true }
+
 figment = { version = "0.10.19", features = ["toml", "json", "yaml", "env"] }
 clap = { version = "4.5.16", features = ["env", "derive"] }
 humantime = { version = "2.2.0" }
+
+mimalloc = { version = "0.1", optional = true }

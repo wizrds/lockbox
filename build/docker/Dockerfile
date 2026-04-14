@@ -17,7 +17,7 @@ WORKDIR /workspace
 
 COPY . .
 
-RUN cargo build --release
+RUN cargo build --release --features mimalloc
 
 FROM debian:bookworm-slim AS runtime
 

@@ -10,6 +10,10 @@ use rustls::crypto::aws_lc_rs;
 use crate::cli::{CliArgs, Cmd, Ctx, CliError};
 
 
+#[cfg(all(feature = "mimalloc", not(feature = "stdalloc")))]
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 #[tokio::main]
 async fn main() {
     let _ = aws_lc_rs::default_provider().install_default();

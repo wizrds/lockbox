@@ -22,4 +22,4 @@ includes:
 tasks:
   run:
     cmds:
-      - cargo run --bin lockbox -- {{.CLI_ARGS}}
+      - cargo run --bin lockbox --features mimalloc -- {{.CLI_ARGS}}
