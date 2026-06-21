@@ -5,6 +5,11 @@ tasks:
     cmds: 
       - cargo update
 
+  check:
+    desc: Check the code
+    cmds:
+      - cargo check --all-features {{.CLI_ARGS}}
+
   fmt:
     desc: Format the code
     cmds:
@@ -21,17 +26,21 @@ tasks:
     desc: Lint the code
     cmds:
       - >
-        cargo clippy --workspace --all-targets --all-features --exclude runtime-scaf {{.CLI_ARGS}}
+        cargo clippy --all-targets --all-features {{.CLI_ARGS}}
 
   lint:fix:
     desc: Lint the code
     cmds:
       - >
-        cargo clippy --workspace --fix --all-targets --all-features --allow-dirty --allow-staged --exclude runtime-scaf {{.CLI_ARGS}}
+        cargo clippy --fix --all-targets --all-features --allow-dirty --allow-staged {{.CLI_ARGS}}
 
   test:
     cmds:
-      - cargo test --all-features --workspace --lib {{.CLI_ARGS}}
+      - cargo test --all-features --lib {{.CLI_ARGS}}
+
+  audit:
+    cmds:
+      - cargo audit {{.CLI_ARGS}}
 
   bench:
     cmds:
