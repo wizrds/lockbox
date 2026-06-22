@@ -115,9 +115,9 @@ Database environment variables
 {{- $replica_dsns = append $replica_dsns $dsn }}
 {{- end }}
 {{- end }}
-{{- if gt (len $replica_dsns) 0 }}
-- name: LOCKBOX__DATABASE__REPLICAS
-  value: "[{{ join "," $replica_dsns }}]"
+{{- range $index, $dsn := $replica_dsns }}
+- name: LOCKBOX__DATABASE__REPLICAS__{{ $index }}
+  value: {{ $dsn | quote }}
 {{- end }}
 {{- range $key, $value := $opts }}
 - name: {{ printf "LOCKBOX__DATABASE__OPTIONS__%s" ($key | lower) }}

@@ -1,9 +1,9 @@
 use uuid::Uuid;
 use chrono::{DateTime, Utc};
 
-use lockbox_core::service::api_key::ApiKeySvc;
+use lockbox_core::{telemetry::Telemetry, service::api_key::ApiKeySvc};
 
-use crate::{config::AppConfig, manifest::ManifestFormat};
+use crate::{config::Config, manifest::ManifestFormat};
 
 
 #[derive(Default, Debug)]
@@ -111,12 +111,22 @@ pub struct CtxApiKeys {
 
 #[derive(Default, Debug)]
 pub struct Ctx {
+    pub telemetry: Telemetry,
     pub config_file: Option<String>,
-    pub app_config: AppConfig,
+    pub app_config: Config,
     pub serve: Option<CtxServe>,
     pub migrate: Option<CtxMigrate>,
     pub config: Option<CtxConfig>,
     pub namespaces: Option<CtxNamespaces>,
     pub tags: Option<CtxTags>,
     pub api_keys: Option<CtxApiKeys>,
+}
+
+impl Ctx {
+    pub fn new(telemetry: Telemetry) -> Self {
+        Self {
+            telemetry,
+            ..Default::default()
+        }
+    }
 }

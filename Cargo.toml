@@ -36,9 +36,13 @@ log = { version = "0.4" }
 
 tracing = { version = "0.1" }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "chrono"] }
-tracing-opentelemetry = { version = "0.32" }
-opentelemetry = { version = "0.31" }
-opentelemetry-otlp = { version = "0.31" }
+tracing-opentelemetry = { version = "0.33" }
+opentelemetry = { version = "0.32" }
+opentelemetry_sdk = { version = "0.32", features = ["rt-tokio", "serde", "serde_json"] }
+opentelemetry-otlp = { version = "0.32" }
+opentelemetry-semantic-conventions = { version = "0.32", features = ["semconv_experimental"] }
+opentelemetry-appender-tracing = { version = "0.32" }
+sentry = { version = "0.48", features = ["anyhow", "tracing", "tower-http", "opentelemetry"] }
 
 rustls = { version = "0.23", features = ["aws_lc_rs"] }
 axum = { version = "0.8", features = ["tracing"] }

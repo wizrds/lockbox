@@ -6,7 +6,7 @@ use jobq::{BatchJobQueueSystemBuilder, BatchJobWorkerOptions};
 use tokio::spawn;
 
 use lockbox_core::{
-    telemetry::{info, setup_logging},
+    telemetry::info,
     database::DatabaseBuilder,
     service::{api_key::{ApiKeyService, ApiKeyServiceTrait}, errors::ApiKeyServiceError},
     repository::{
@@ -50,7 +50,7 @@ impl Cmd for CliCommandServe {
     }
 
     async fn run(&self, ctx: &mut Ctx) -> Result<()> {
-        setup_logging();
+        ctx.telemetry.enable_logging();
 
         info!(
             event = "Starting",

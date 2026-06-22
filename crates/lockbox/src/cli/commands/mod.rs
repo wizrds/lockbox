@@ -1,3 +1,4 @@
+pub mod completions;
 pub mod serve;
 pub mod migrate;
 pub mod config;

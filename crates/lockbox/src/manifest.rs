@@ -13,7 +13,7 @@ pub enum ManifestError {
     Io(#[from] std::io::Error),
 
     #[error("Failed to parse YAML: {0}")]
-    Yml(#[from] serde_norway::Error),
+    Yml(#[from] yaml_serde::Error),
 
     #[error("Failed to parse JSON: {0}")]
     Json(#[from] serde_json::Error),
@@ -60,7 +60,7 @@ pub async fn load_manifest<T: DeserializeOwned>(path: impl AsRef<Path>) -> Resul
     let path = path.as_ref();
     let content = read_file(path).await?;
     match detect_format(path) {
-        Ok(ManifestFormat::Yaml) => serde_norway::from_str(&content).map_err(ManifestError::Yml),
+        Ok(ManifestFormat::Yaml) => yaml_serde::from_str(&content).map_err(ManifestError::Yml),
         Ok(ManifestFormat::Json) => serde_json::from_str(&content).map_err(ManifestError::Json),
         Err(e) => Err(e),
     }
@@ -92,7 +92,7 @@ pub async fn save_manifest<T: Serialize>(value: &T, path: impl AsRef<Path>) -> R
 /// The serialized pretty string
 pub fn to_serialized_string_pretty<T: Serialize>(value: &T, format: ManifestFormat) -> Result<String, ManifestError> {
     match format {
-        ManifestFormat::Yaml => serde_norway::to_string(value).map_err(ManifestError::Yml),
+        ManifestFormat::Yaml => yaml_serde::to_string(value).map_err(ManifestError::Yml),
         ManifestFormat::Json => serde_json::to_string_pretty(value).map_err(ManifestError::Json),
     }
 }
@@ -108,7 +108,7 @@ pub fn to_serialized_string_pretty<T: Serialize>(value: &T, format: ManifestForm
 /// The serialized string
 pub fn to_serialized_string<T: Serialize>(value: &T, format: ManifestFormat) -> Result<String, ManifestError> {
     match format {
-        ManifestFormat::Yaml => serde_norway::to_string(value).map_err(ManifestError::Yml),
+        ManifestFormat::Yaml => yaml_serde::to_string(value).map_err(ManifestError::Yml),
         ManifestFormat::Json => serde_json::to_string(value).map_err(ManifestError::Json),
     }
 }

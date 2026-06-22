@@ -1,8 +1,14 @@
 use axum::{
-    extract::{FromRequestParts, OptionalFromRequestParts, path::ErrorKind, rejection::PathRejection},
+    extract::{
+        OptionalFromRequestParts,
+        FromRequestParts,
+        FromRequest,
+        Request,
+    },
+    response::{IntoResponse, Response},
     http::{request::Parts, header::AUTHORIZATION},
 };
-use serde::de::DeserializeOwned;
+use serde::{Serialize, de::DeserializeOwned};
 use serde_qs::Config as QsConfig;
 use utoipa::ToSchema;
 
@@ -127,75 +133,12 @@ where
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         match <axum::extract::Path<T> as FromRequestParts<S>>::from_request_parts(parts, state).await {
             Ok(value) => Ok(Self(value.0)),
-            Err(rejection) => match rejection {
-                PathRejection::FailedToDeserializePathParams(inner) => {
-                    match inner.into_kind() {
-                        ErrorKind::WrongNumberOfParameters { got, expected } => Err(
-                            ErrorResponseDTO::from(
-                                ApiError::bad_request(&format!(
-                                    "Wrong number of path parameters: got {}, expected {}",
-                                    got, expected
-                                ))
-                            )
-                        ),
-                        ErrorKind::ParseErrorAtKey { key, .. } => Err(
-                            ErrorResponseDTO::from(
-                                ApiError::bad_request(&format!(
-                                    "Failed to parse path parameter '{}'", key
-                                ))
-                            ),
-                        ),
-                        ErrorKind::ParseErrorAtIndex { index, .. } => Err(
-                            ErrorResponseDTO::from(
-                                ApiError::bad_request(&format!(
-                                    "Failed to parse path parameter at index {}", index
-                                ))
-                            ),
-                        ),
-                        ErrorKind::ParseError { .. } => Err(
-                            ErrorResponseDTO::from(
-                                ApiError::bad_request("Failed to parse path parameters")
-                            ),
-                        ),
-                        ErrorKind::InvalidUtf8InPathParam { key } => Err(
-                            ErrorResponseDTO::from(
-                                ApiError::bad_request(&format!(
-                                    "Invalid UTF-8 in path parameter '{}'", key
-                                ))
-                            ),
-                        ),
-                        ErrorKind::UnsupportedType { .. } => Err(
-                            ErrorResponseDTO::from(
-                                ApiError::bad_request("Unsupported type for path parameter")
-                            ),
-                        ),
-                        ErrorKind::Message(msg) => Err(
-                            ErrorResponseDTO::from(
-                                ApiError::bad_request(&msg)
-                            ),
-                        ),
-                        _ => Err(
-                            ErrorResponseDTO::from(
-                                ApiError::unexpected_error("Failed to extract path parameters")
-                            ),
-                        ),
-                    }
-                },
-                PathRejection::MissingPathParams(error) => Err(
-                    ErrorResponseDTO::from(
-                        ApiError::unexpected_error(&error.to_string())
-                    )
-                ),
-                _ => Err(
-                    ErrorResponseDTO::from(
-                        ApiError::unexpected_error("Failed to extract path parameters")
-                    )
-                ),
-            }
+            Err(rejection) => Err(ErrorResponseDTO::from(
+                ApiError::from(rejection)
+            )),
         }
     }
 }
-
 
 #[derive(Debug, Clone, ToSchema)]
 pub struct Query<T>(pub T);
@@ -236,5 +179,34 @@ where
                 .map(|q| OptionalQuery(Some(q.0))),
             None => Ok(OptionalQuery(None)),
         }
+    }
+}
+
+pub struct Json<T>(pub T);
+
+impl<S, T> FromRequest<S> for Json<T>
+where
+    T: DeserializeOwned + Send,
+    S: Send + Sync,
+{
+    type Rejection = ErrorResponseDTO;
+
+    async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
+        match <axum::extract::Json<T> as FromRequest<S>>::from_request(request, state).await {
+            Ok(value) => Ok(Self(value.0)),
+            Err(rejection) => Err(ErrorResponseDTO::from(
+                ApiError::from(rejection)
+            )),
+        }
+    }
+}
+
+impl<T> IntoResponse for Json<T> 
+where
+    T: Serialize,
+{
+    fn into_response(self) -> Response {
+        <axum::response::Json<T>>::from(self.0)
+            .into_response()
     }
 }
