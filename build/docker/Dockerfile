@@ -1,30 +1,36 @@
 # syntax=docker/dockerfile:1
-ARG RUST_VERSION=1.94.0
-FROM rust:${RUST_VERSION}-slim-bookworm AS build
+ARG RUST_VERSION=1.95.0
+FROM rust:${RUST_VERSION}-alpine AS build
 
-ARG RUST_VERSION=1.94.0
+ARG RUST_VERSION=1.95.0
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
-    build-essential \
-    pkg-config \
+RUN apk add --no-cache \
+    build-base \
+    pkgconfig \
     curl \
     cmake \
-    libssl-dev \
-    libz-dev \
-    && rm -rf /var/lib/apt/lists/*
+    openssl-dev \
+    openssl-libs-static \
+    zlib-dev \
+    zlib-static \
+    musl-dev
 
 WORKDIR /workspace
 
 COPY . .
 
+# Build statically against musl
 RUN cargo build --release --features mimalloc
 
-FROM debian:bookworm-slim AS runtime
+FROM alpine:3.21 AS runtime
 
-RUN apt-get update && apt-get upgrade -y \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+    curl \
+    ca-certificates \
+    shadow \
+    sudo
 
-RUN useradd -u 1000 -G sudo -U -m -s /bin/bash lockbox \
+RUN useradd -u 1000 -G wheel -U -m -s /bin/sh lockbox \
     && echo "lockbox ALL=(ALL) NOPASSWD: /bin/chown" >> /etc/sudoers
 
 RUN mkdir -p /srv/lockbox && chown lockbox:lockbox /srv/lockbox

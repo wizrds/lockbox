@@ -89,8 +89,10 @@ jobs:
 
       - name: Build OCI image
         run: |
-          task docker:build IMAGE_NAME=${{ env.IMAGE_URI }} IMAGE_TAG=${{ github.ref_name }}
-          
+          task docker:build \
+            IMAGE_NAME=${{ env.IMAGE_URI }} \
+            IMAGE_TAG=${{ github.ref_name }}
+
       - name: Generate OCI Image SBOM SPDX
         uses: anchore/sbom-action@v0
         with:
@@ -104,8 +106,8 @@ jobs:
         with:
           image: ${{ env.IMAGE_URI }}:${{ github.ref_name }}
           format: cyclonedx-json
-          output-file: sbom/sbom.oci.cyclonedx.json 
-          artifact-name: sbom.oci.cyclonedx.json       
+          output-file: sbom/sbom.oci.cyclonedx.json
+          artifact-name: sbom.oci.cyclonedx.json
 
       - name: Scan OCI image
         uses: anchore/scan-action@v6
@@ -114,23 +116,82 @@ jobs:
           image: ${{ env.IMAGE_URI }}:${{ github.ref_name }}
           fail-build: true
           severity-cutoff: critical
+          output-format: json
+          output-file: scan-results.json
 
-      - name: Upload OCI SBOM artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-oci
-          path: sbom/sbom.oci.*.json
-
-      - name: Inspect SARIF report
+      - name: Generate vulnerability summary
         if: always()
         run: |
-          cat ${{ steps.scan.outputs.sarif }}
+          echo "# Container Vulnerability Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ ! -s scan-results.json ]; then
+            echo "No scan results found." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          COUNT=$(jq '
+            [
+              .matches[]
+              | select(
+                  .vulnerability.severity == "Critical" or
+                  .vulnerability.severity == "High"
+                )
+            ]
+            | length
+          ' scan-results.json)
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "✅ No Critical or High vulnerabilities found." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          echo "Found **$COUNT** Critical/High vulnerabilities." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          jq -r '
+            .matches[]
+            | select(
+                .vulnerability.severity == "Critical" or
+                .vulnerability.severity == "High"
+              )
+            |
+            "
+            ## \(.vulnerability.id)
+
+            **Severity:** \(.vulnerability.severity)
+
+            **Package:** \(.artifact.name)
+
+            **Installed Version:** \(.artifact.version)
+
+            **Fixed Version:** \(
+              .vulnerability.fix.versions[0] //
+              "No fix available"
+            )
+
+            **Description:**
+            \(.vulnerability.description)
+
+            **Advisory:**
+            \(.vulnerability.dataSource)
+
+            ---
+            "
+          ' scan-results.json' >> $GITHUB_STEP_SUMMARY
 
       - name: Upload SARIF report
         if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
+          category: container-scan
+
+      - name: Upload OCI SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-oci
+          path: sbom/sbom.oci.*.json
 
       - name: Push OCI image
         run: |

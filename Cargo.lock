@@ -2042,7 +2042,7 @@ dependencies = [
 
 [[package]]
 name = "lockbox"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2069,7 +2069,7 @@ dependencies = [
 
 [[package]]
 name = "lockbox-api"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2101,7 +2101,7 @@ dependencies = [
 
 [[package]]
 name = "lockbox-core"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2139,7 +2139,7 @@ dependencies = [
 
 [[package]]
 name = "lockbox-macros"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2148,7 +2148,7 @@ dependencies = [
 
 [[package]]
 name = "lockbox-migrations"
-version = "0.2.2"
+version = "0.3.0"
 dependencies = [
  "sea-orm",
  "sea-orm-migration",
