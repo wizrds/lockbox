@@ -1,6 +1,12 @@
 # Changelog
 
 ---
+## [0.3.1](https://github.com/wizrds/lockbox/-/compare/0.3.0...0.3.1) - 2026-06-22
+
+### Bug Fixes
+
+- Fix vulnerabilities in docker image and switch to alpine for smaller footprint - ([b20c5d9](https://github.com/wizrds/lockbox/-/commit/b20c5d93f010f7d8ae3958b9ba86633d510b9510)) - Timothy Pogue
+---
 ## [0.3.0](https://github.com/wizrds/lockbox/-/compare/0.2.2...0.3.0) - 2026-06-22
 
 ### Features
