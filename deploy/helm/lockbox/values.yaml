@@ -176,7 +176,7 @@ server:
 # -- The image to use for the lockbox container
 image:
   # -- The repository to use for the image
-  repository: registry.gitlab.com/wizrds/lockbox
+  repository: ghcr.io/wizrds/lockbox
   # -- The tag to use for the image. If null, the chart appVersion will be used.
   tag: null
   # -- The pull policy to use for the image

@@ -40,3 +40,6 @@ scripts/
 
 # Repomix
 repomix.output.md
+
+# Agent tasks
+.agent/tasks

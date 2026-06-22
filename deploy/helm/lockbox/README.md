@@ -2,7 +2,7 @@
 
 Helm chart for Lockbox
 
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.1](https://img.shields.io/badge/AppVersion-0.1.1-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.3.0](https://img.shields.io/badge/AppVersion-0.3.0-informational?style=flat-square)
 
 ## Installing the Chart
 
@@ -37,10 +37,10 @@ $ helm upgrade --install lockbox oci://ghcr.io/wizrds/lockbox/charts/lockbox
 | config.taskQueue.workerCount | int | `4` | The number of batch workers to run |
 | config.telemetry.enabled | bool | `false` | Enable telemetry |
 | config.telemetry.endpoint | string | `""` | The telemetry endpoint |
-| image | object | `{"pullPolicy":"Always","pullSecrets":[],"repository":"registry.gitlab.com/wizrds/lockbox","tag":null}` | The image to use for the lockbox container |
+| image | object | `{"pullPolicy":"Always","pullSecrets":[],"repository":"ghcr.io/wizrds/lockbox","tag":null}` | The image to use for the lockbox container |
 | image.pullPolicy | string | `"Always"` | The pull policy to use for the image |
 | image.pullSecrets | list | `[]` | The pull secrets to use for the image |
-| image.repository | string | `"registry.gitlab.com/wizrds/lockbox"` | The repository to use for the image |
+| image.repository | string | `"ghcr.io/wizrds/lockbox"` | The repository to use for the image |
 | image.tag | string | `nil` | The tag to use for the image. If null, the chart appVersion will be used. |
 | migrations.enabled | bool | `false` | Run database migrations at startup |
 | server.affinity | object | `{}` | server Affinity |
