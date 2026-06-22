@@ -1,6 +1,12 @@
 # Changelog
 
 ---
+## [0.3.2](https://github.com/wizrds/lockbox/-/compare/0.3.1...0.3.2) - 2026-06-22
+
+### Bug Fixes
+
+- Revert scan step changes in release workflow - ([c9d5dea](https://github.com/wizrds/lockbox/-/commit/c9d5dea68d7fb078149c867e61b0b0071780d495)) - Timothy Pogue
+---
 ## [0.3.1](https://github.com/wizrds/lockbox/-/compare/0.3.0...0.3.1) - 2026-06-22
 
 ### Bug Fixes
