@@ -1,6 +1,12 @@
 # Changelog
 
 ---
+## [0.3.0](https://github.com/wizrds/lockbox/-/compare/0.2.2...0.3.0) - 2026-06-22
+
+### Features
+
+- Rework and bump unmaintained dependencies and security fixes  - ([14a632b](https://github.com/wizrds/lockbox/-/commit/14a632b19bdeb43a46c6f778fe68de8d461ddf59)) - Timothy Pogue
+---
 ## [0.2.2](https://github.com/wizrds/lockbox/-/compare/0.2.1...0.2.2) - 2026-04-14
 
 ### Bug Fixes
