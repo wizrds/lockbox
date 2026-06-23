@@ -11,7 +11,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-lockbox-sdk = { git = "https://github.com/wizrds/lockbox.git", rev = "main" }
+lockbox-sdk = { git = "https://github.com/wizrds/lockbox.git", branch = "main" }
 tokio = { version = "1", features = ["full"] }
 ```
 

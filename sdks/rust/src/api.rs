@@ -12,6 +12,7 @@ use crate::{
 
 
 /// The Lockbox API client.
+#[derive(Clone)]
 pub struct LockboxApiClient {
     client: ApiClient,
 }
