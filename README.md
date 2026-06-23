@@ -24,6 +24,12 @@ For the available values please refer to the [values.yaml](deploy/helm/lockbox/v
 
 For API reference, visit the [API Documentation](http://localhost:8087/.well-known/docs) once the container is running.
 
+## SDK
+
+There are SDKs available for Lockbox in the following languages:
+
+- [Rust](sdks/rust/README.md)
+
 ## License
 This project is licensed under ISC License.
 

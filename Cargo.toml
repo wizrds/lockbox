@@ -15,6 +15,9 @@ members = [
     "crates/lockbox-api",
     "crates/lockbox",
 ]
+exclude = [
+    "sdks/rust"
+]
 
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
